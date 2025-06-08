@@ -29,7 +29,7 @@ class TokenService {
     return await tokenModel.findOneAndDelete({ refreshToken });
   }
 
-  async removeToken(refreshToken) {
+  async findToken(refreshToken) {
     return await tokenModel.findOne({ refreshToken });
   }
 

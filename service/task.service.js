@@ -11,6 +11,8 @@ class TaskService {
       priority,
       deadline: deadline ? new Date(deadline) : null,
     });
+
+    return task;
   }
 }
 

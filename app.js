@@ -4,9 +4,16 @@ const express = require("express");
 const mongoose = require("mongoose");
 const errorMiddleware = require("./middlewares/error.middleware");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
 const app = express();
 
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.CLIENT_URL,
+  })
+);
 app.use(express.json());
 app.use(cookieParser({}));
 

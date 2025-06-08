@@ -37,6 +37,30 @@ class AuthService {
     await tokenService.saveToken(user.id, tokens.refreshToken);
     return { user, ...tokens };
   }
+
+  async logout(refreshToken) {
+    return await tokenService.removeToken(refreshToken);
+  }
+
+  async refresh(refreshToken) {
+    if (!refreshToken) {
+      throw BaseError.UnauthorizedError("Bad authorization");
+    }
+
+    const userPayload = tokenService.validateRefreshToken(refreshToken);
+    const tokenDb = await tokenService.findToken(refreshToken);
+    if (!userPayload || !tokenDb) {
+      throw BaseError.UnauthorizedError("Bad authorization");
+    }
+
+    const user = await userModel.findById(userPayload.id);
+
+    const tokens = tokenService.generateToken({ ...user });
+
+    await tokenService.saveToken(user.id, tokens.refreshToken);
+
+    return { user, ...tokens };
+  }
 }
 
 module.exports = new AuthService();
