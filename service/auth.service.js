@@ -2,6 +2,7 @@ const BaseError = require("../errors/base.error");
 const userModel = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const tokenService = require("./token.service");
+const UserDto = require("../dtos/user.dto");
 
 class AuthService {
   async register(email, password) {
@@ -15,10 +16,11 @@ class AuthService {
 
     const hashPassword = await bcrypt.hash(password, 10);
     const newUser = await userModel.create({ email, password: hashPassword });
+    const userDto = new UserDto(newUser);
 
-    const tokens = tokenService.generateToken({ ...newUser });
-    await tokenService.saveToken(newUser.id, tokens.refreshToken);
-    return { user: newUser, ...tokens };
+    const tokens = tokenService.generateToken({ ...userDto });
+    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+    return { user: userDto, ...tokens };
   }
 
   async login(email, password) {
@@ -33,9 +35,10 @@ class AuthService {
       throw BaseError.BadRequest("Password is incorrect");
     }
 
-    const tokens = tokenService.generateToken({ ...user });
-    await tokenService.saveToken(user.id, tokens.refreshToken);
-    return { user, ...tokens };
+    const userDto = new UserDto(user);
+    const tokens = tokenService.generateToken({ ...userDto });
+    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+    return { user: userDto, ...tokens };
   }
 
   async logout(refreshToken) {
@@ -55,11 +58,12 @@ class AuthService {
 
     const user = await userModel.findById(userPayload.id);
 
-    const tokens = tokenService.generateToken({ ...user });
+    const userDto = new UserDto(user);
+    const tokens = tokenService.generateToken({ ...userDto });
 
-    await tokenService.saveToken(user.id, tokens.refreshToken);
+    await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
-    return { user, ...tokens };
+    return { user: userDto, ...tokens };
   }
 }
 
